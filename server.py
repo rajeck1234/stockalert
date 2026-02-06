@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import yfinance as yf
+import os
 
 # -----------------------------
 # Flask Setup
@@ -8,7 +9,11 @@ import yfinance as yf
 app = Flask(__name__, static_folder="public")
 CORS(app)
 
-PORT = 3000
+# PORT = 3000
+# const PORT = process.env.PORT || 3000;
+
+
+PORT = int(os.environ.get("PORT", 3000))
 
 # -----------------------------
 # Demo Portfolio (Memory Only)
@@ -130,4 +135,8 @@ def sell_stock():
 # Run Server
 # -----------------------------
 if __name__ == "__main__":
-    app.run(port=PORT, debug=True)
+    
+    app.run(host="0.0.0.0", port=PORT)
+
+    # app.run(port=PORT, debug=True)
+
