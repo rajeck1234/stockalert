@@ -1,5 +1,5 @@
-// const API = "http://localhost:3000";
-const API = "https://stockmarket-8e8r.onrender.com";
+const API = "http://localhost:3000";
+// const API = "https://stockmarket-8e8r.onrender.com";
 
 // Load stocks
 async function loadStocks() {
