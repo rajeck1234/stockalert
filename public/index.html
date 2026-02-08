@@ -1,19 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Live Trading App</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>📈 Live Trading</title>
+
+<style>
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+}
+
+header {
+    text-align: center;
+    padding: 15px;
+    background: #1e293b;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.section-title {
+    padding: 10px 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.container {
+    padding: 10px;
+}
+
+.stock {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stock-info h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.stock-info p {
+    margin: 5px 0 0 0;
+    color: #94a3b8;
+}
+
+button {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.buy {
+    background: #22c55e;
+    color: white;
+}
+
+.sell {
+    background: #ef4444;
+    color: white;
+}
+
+.stop-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: orange;
+    padding: 12px 20px;
+    display: none;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>📈 Live Trading</h1>
+<header>📈 Live Trading</header>
+<button onclick="addStock()">➕ Add Stock</button>
 
-<h2>Live Stocks</h2>
-<div id="stocks"></div>
+<div class="section-title">Live Stocks</div>
+<div class="container" id="stocks"></div>
 
-<h2>Your Portfolio</h2>
-<div id="portfolio"></div>
+<div class="section-title">Your Portfolio</div>
+<div class="container" id="portfolio"></div>
+
+<button id="stopAlarm" class="stop-btn" onclick="stopAlarm()">Stop Alarm</button>
 
 <script src="script.js"></script>
+
 </body>
 </html>
