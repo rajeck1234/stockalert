@@ -60,7 +60,7 @@ def get_stocks():
             price = ticker.info.get("currentPrice")
 
             # Fallback if currentPrice missing
-            print(price)
+            # print(price)
             if price is None:
                 price = ticker.fast_info.get("last_price")
 
