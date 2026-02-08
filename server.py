@@ -70,7 +70,7 @@ def fetch_price(symbol):
 def update_prices():
     global prices_cache
 
-    print("Updating prices...")
+    # print("Updating prices...")
 
     for symbol in stocks:
 
