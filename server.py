@@ -2,122 +2,149 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import yfinance as yf
 import os
+import json
+import threading
+import time
 
-# -----------------------------
-# Flask Setup
-# -----------------------------
 app = Flask(__name__, static_folder="public")
 CORS(app)
 
-live_prices = {}
-# PORT = 3000
-# const PORT = process.env.PORT || 3000;
-
-
 PORT = int(os.environ.get("PORT", 3000))
 
-# -----------------------------
-# Demo Portfolio (Memory Only)
-# -----------------------------
-# portfolio = []
-
-
 
 # -----------------------------
-# Stock List
+# JSON Helpers
 # -----------------------------
-import json
+def load_json(file, default):
+    try:
+        with open(file) as f:
+            return json.load(f)
+    except:
+        return default
 
-with open("stocks.json") as f:
-    stocks = json.load(f)
-    
-with open("portfolio.json") as f:
-    portfolio = json.load(f)    
-# stocks = [
-#     "RELIANCE.NS",
-#     "TCS.NS",
-#     "INFY.NS",
-#     "HDFCBANK.NS",
-#     "ICICIBANK.NS",
-#     "MAZDOCK.NS",
-#     "ITC.NS"
-# ]
+
+def save_json(file, data):
+    with open(file, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+# -----------------------------
+# Load Files
+# -----------------------------
+stocks = load_json("stocks.json", [])
+portfolio = load_json("portfolio.json", [])
+prices_cache = load_json("prices.json", {})
+
+
+# -----------------------------
+# ⭐ BEST PRICE FETCH FUNCTION
+# -----------------------------
+def fetch_price(symbol):
+
+    try:
+        ticker = yf.Ticker(symbol)
+
+        # 1️⃣ Primary
+        price = ticker.info.get("currentPrice")
+
+        # 2️⃣ Fallback
+        if price is None:
+            price = ticker.fast_info.get("last_price")
+
+        # 3️⃣ Last fallback
+        if price is None:
+            hist = ticker.history(period="1d")
+            if not hist.empty:
+                price = hist["Close"].iloc[-1]
+
+        return price
+
+    except Exception as e:
+        print("Fetch error:", symbol, e)
+        return None
+
+
+# -----------------------------
+# Update Prices From Yahoo
+# -----------------------------
+def update_prices():
+    global prices_cache
+
+    print("Updating prices...")
+
+    for symbol in stocks:
+
+        price = fetch_price(symbol)
+
+        if price:
+            prices_cache[symbol] = float(price)
+
+    save_json("prices.json", prices_cache)
+
+
+# -----------------------------
+# Background Scheduler
+# -----------------------------
+def scheduler():
+    while True:
+        update_prices()
+        time.sleep(5)
+
 
 # -----------------------------
 # Serve Frontend
 # -----------------------------
 @app.route("/")
-def serve_frontend():
+def index():
     return send_from_directory(app.static_folder, "index.html")
 
+
 @app.route("/<path:path>")
-def serve_static_files(path):
+def static_files(path):
     return send_from_directory(app.static_folder, path)
 
 
 # -----------------------------
-# Get Live Stock Prices
+# Get Stocks
 # -----------------------------
-@app.route("/stocks", methods=["GET"])
+@app.route("/stocks")
 def get_stocks():
 
-    try:
-        result = []
+    result = []
 
-        for symbol in stocks:
-            ticker = yf.Ticker(symbol)
+    for symbol in stocks:
+        result.append({
+            "name": symbol,
+            "price": prices_cache.get(symbol)
+        })
 
-            # Try getting current price
-            price = ticker.info.get("currentPrice")
-
-            # Fallback if currentPrice missing
-            live_prices[symbol] = price
-            print(price)
-            if price is None:
-                price = ticker.fast_info.get("last_price")
-
-            result.append({
-                "name": symbol,
-                "price": price,
-                
-            })
-
-        return jsonify(result)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify(result)
 
 
 # -----------------------------
-# Get Portfolio
+# Add Stock
 # -----------------------------
-
 @app.route("/add-stock", methods=["POST"])
 def add_stock():
-    try:
-        data = request.get_json()
-        symbol = data["symbol"].upper()
 
-        if not symbol.endswith(".NS"):
-            symbol += ".NS"
+    data = request.get_json()
+    symbol = data["symbol"].upper()
 
-        if symbol not in stocks:
-            stocks.append(symbol)
+    if not symbol.endswith(".NS"):
+        symbol += ".NS"
 
-            # ⭐ Save to file permanently
-            with open("stocks.json", "w") as f:
-                json.dump(stocks, f)
+    if symbol not in stocks:
+        stocks.append(symbol)
+        save_json("stocks.json", stocks)
 
-        return jsonify({"message": "Stock Added", "stocks": stocks})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify(stocks)
 
 
-@app.route("/portfolio", methods=["GET"])
+# -----------------------------
+# Portfolio
+# -----------------------------
+@app.route("/portfolio")
 def get_portfolio():
-    
-    print(portfolio)
     return jsonify(portfolio)
 
 
@@ -126,31 +153,22 @@ def get_portfolio():
 # -----------------------------
 @app.route("/buy", methods=["POST"])
 def buy_stock():
-    try:
-        data = request.get_json()
-        buy_price = float(data["price"])
 
-        stock = {
-            "name": data["name"],
-            "buy_price": buy_price,
-            "target_price": buy_price * 1.03,
-            "highest_price": buy_price,
-            "alert_triggered": False
-        }
+    data = request.get_json()
+    buy_price = float(data["price"])
 
-        portfolio.append(stock)
+    stock = {
+        "name": data["name"],
+        "buy_price": buy_price,
+        "target_price": buy_price * 1.03,
+        "highest_price": buy_price,
+        "alert_triggered": False
+    }
 
-        # ⭐ Save to JSON
-        with open("portfolio.json", "w") as f:
-            json.dump(portfolio, f)
+    portfolio.append(stock)
+    save_json("portfolio.json", portfolio)
 
-        return jsonify({
-            "message": "Stock Bought Successfully",
-            "portfolio": portfolio
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify(portfolio)
 
 
 # -----------------------------
@@ -158,62 +176,68 @@ def buy_stock():
 # -----------------------------
 @app.route("/sell", methods=["POST"])
 def sell_stock():
-    try:
-        data = request.get_json()
-        stock_name = data["name"]
 
-        global portfolio
-        portfolio = [s for s in portfolio if s["name"] != stock_name]
+    name = request.get_json()["name"]
 
-        # ⭐ Save updated list
-        with open("portfolio.json", "w") as f:
-            json.dump(portfolio, f)
+    global portfolio
+    portfolio = [s for s in portfolio if s["name"] != name]
 
-        return jsonify({
-            "message": "Stock Sold Successfully",
-            "portfolio": portfolio
-        })
+    save_json("portfolio.json", portfolio)
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify(portfolio)
+
+
+# -----------------------------
+# ALERT LOGIC
+# -----------------------------
+@app.route("/check-alerts")
+def check_alerts():
+
+    alerts = []
+
+    for stock in portfolio:
+
+        symbol = stock["name"]
+        current_price = prices_cache.get(symbol)
+
+        if not current_price:
+            continue
+
+        buy_price = stock["buy_price"]
+        target_price = stock["target_price"]
+        highest_price = stock["highest_price"]
+
+        # Ignore before 3%
+        if current_price < target_price:
+            continue
+
+        # Update highest
+        if current_price > highest_price:
+            stock["highest_price"] = current_price
+            stock["alert_triggered"] = False
+            continue
+
+        # Trailing drop
+        drop_percent = (highest_price - current_price) / highest_price
+
+        if drop_percent >= 0.01 and not stock["alert_triggered"]:
+
+            profit_percent = (current_price - buy_price) / buy_price
+
+            if profit_percent >= 0.03:
+                stock["alert_triggered"] = True
+                alerts.append(symbol)
+
+    save_json("portfolio.json", portfolio)
+
+    return jsonify(alerts)
 
 
 # -----------------------------
 # Run Server
 # -----------------------------
-@app.route("/check-alerts", methods=["GET"])
-def check_alerts():
-    alerts = []
-    print("hii")
-    for stock in portfolio:
-        # ticker = yf.Ticker(stock["name"])
-        # current_price = ticker.fast_info.get("currentPrice")
-        current_price = live_prices.get(stock["name"])
-        print(current_price)
-        print(stock)
-        # print("uuu")
-        if current_price is None:
-            continue
-         
-        if current_price >= stock["target_price"]:
-            # print("ooo")
-            # stock["alert_triggered"] = True
-            # alerts.append(stock["name"])
-
-            if current_price > stock["highest_price"]:
-                stock["highest_price"] = current_price
-                stock["alert_triggered"] = False
-
-            elif current_price < stock["highest_price"]:
-                stock["alert_triggered"] = True
-                alerts.append(stock["name"])
-    # alerts.append(stock["name"])
-    return jsonify(alerts)
-
-
 if __name__ == "__main__":
-    
+
+    threading.Thread(target=scheduler, daemon=True).start()
+
     app.run(host="0.0.0.0", port=PORT)
-
-    # app.run(port=PORT, debug=True)
-

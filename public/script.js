@@ -1,24 +1,21 @@
 
 const API = "http://localhost:3000";
+
+// const API = "https://stockmarket-production-8cf0.up.railway.app/"
 // const API = "https://stockmarket-8e8r.onrender.com";
-
+coun =0
 // Load stocks
-let alarm = new Audio("alarm.mp3");
-alarm.loop = true;
-
-coun = 1
 async function loadStocks() {
     coun++
     const res = await fetch(API + "/stocks");
     const data = await res.json();
-
+    // console.log(coun); 
     const div = document.getElementById("stocks");
     div.innerHTML = "";
 
     data.forEach(stock => {
         div.innerHTML += `
         <div class="stock">
-           
             <h3>${stock.name}</h3>
             <p>Price: ₹${stock.price}</p>
             <button onclick="buyStock('${stock.name}')">

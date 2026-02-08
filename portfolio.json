@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "name": "TCS.NS",
+    "buy_price": 2840.0,
+    "target_price": 2925.2000000000003,
+    "highest_price": 2940.3,
+    "alert_triggered": false
+  }
+]
