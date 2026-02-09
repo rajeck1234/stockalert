@@ -3,6 +3,7 @@
 const API = "https://stockalert-production.up.railway.app/";
 // const API = "https://stockmarket-production-8cf0.up.railway.app/"
 // const API = "https://stockmarket-8e8r.onrender.com";
+const alarm = new Audio("alarm.mp3");
 coun =0
 // Load stocks
 async function loadStocks() {
