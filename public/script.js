@@ -81,8 +81,8 @@ async function loadPortfolio() {
 
     data.forEach(stock => {
         const isAlert = alertStocks.includes(stock.name);
-        // console.log("Alert Stocks:", alertStocks);
-        // console.log("Current Stock:", stock.name);
+        console.log("Alert Stocks:", alertStocks);
+        console.log("Current Stock:", stock.name);
         div.innerHTML += `
         <div class="stock ${isAlert ? "alert-stock" : ""}">
 
