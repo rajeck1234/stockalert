@@ -3,18 +3,28 @@
 const API = "https://stockalert-production.up.railway.app/";
 // const API = "https://stockmarket-production-8cf0.up.railway.app/"
 // const API = "https://stockmarket-8e8r.onrender.com";
-const alarm = new Audio("alarm.mp3");
+
+// const API = "http://localhost:3000";
+
+// const API = "https://stockmarket-production-8cf0.up.railway.app/"
+// const API = "https://stockmarket-8e8r.onrender.com";
 coun =0
+const alarm = new Audio("alarm.mp3");
+let alertStocks = [];
+
 // Load stocks
 async function loadStocks() {
+
+
     coun++
     const res = await fetch(API + "/stocks");
     const data = await res.json();
-    // console.log(coun); 
+    console.log(coun); 
     const div = document.getElementById("stocks");
     div.innerHTML = "";
 
     data.forEach(stock => {
+        
         div.innerHTML += `
         <div class="stock">
             <h3>${coun}</h3>
@@ -32,9 +42,14 @@ async function loadStocks() {
 // Portfolio
 
 async function checkAlerts() {
-
+    console.log("check1");
     const res = await fetch(API + "/check-alerts");
     const data = await res.json();
+    alertStocks = data;
+    loadPortfolio();
+
+    // console.log("check1");
+    // console.log(data);
 
     if (data.length > 0) {
         alarm.play();
@@ -57,6 +72,7 @@ async function addStock() {
 }
 
 async function loadPortfolio() {
+
     const res = await fetch(API + "/portfolio");
     const data = await res.json();
 
@@ -64,12 +80,18 @@ async function loadPortfolio() {
     div.innerHTML = "";
 
     data.forEach(stock => {
+        const isAlert = alertStocks.includes(stock.name);
+        // console.log("Alert Stocks:", alertStocks);
+        // console.log("Current Stock:", stock.name);
         div.innerHTML += `
-        <div class="stock">
+        <div class="stock ${isAlert ? "alert-stock" : ""}">
+
             <h3>${stock.name}</h3>
             <p>Bought At: ₹${stock.buy_price}</p>
-            <button onclick="sellStock('${stock.name}')">
-                Sell
+            <button 
+    onclick="sellStock('${stock.name}')"
+    class="${isAlert ? "sell-alert" : ""}">
+                Sells
             </button>
         </div>
         `;
