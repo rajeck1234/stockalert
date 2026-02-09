@@ -212,7 +212,7 @@ def check_alerts():
             continue
 
         # Update highest
-        if current_price > highest_price:
+        if current_price >= highest_price:
             stock["highest_price"] = current_price
             stock["alert_triggered"] = False
             continue
@@ -220,7 +220,7 @@ def check_alerts():
         # Trailing drop
         drop_percent = (highest_price - current_price) / highest_price
 
-        if drop_percent >= 0.01 and not stock["alert_triggered"]:
+        if drop_percent >= 0.00 and not stock["alert_triggered"]:
 
             profit_percent = (current_price - buy_price) / buy_price
 
