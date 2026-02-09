@@ -266,7 +266,7 @@ def check_alerts():
         # 🟥 Alarm ON → falling direction + drop threshold
         # print(current_price)
         # print(last_price)
-        if (current_price <= last_price):
+        if (current_price < last_price):
             stock["alert_triggered"] = True
             alerts.append(symbol)
 
