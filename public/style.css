@@ -1,10 +1,111 @@
+/* ---------- Global ---------- */
 body {
-    font-family: Arial;
-    padding: 20px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #0f172a;
+    color: white;
 }
 
+/* ---------- Header ---------- */
+header {
+    text-align: center;
+    padding: 15px;
+    background-color: #1e293b;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ---------- Sections ---------- */
+.section-title {
+    padding: 12px 16px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.container {
+    padding: 10px 16px;
+}
+
+/* ---------- Stock Card ---------- */
 .stock {
-    border: 1px solid black;
-    margin: 10px;
-    padding: 10px;
+    background-color: #1e293b;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- Stock Info ---------- */
+.stock-info h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.stock-info p {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+/* ---------- Buttons ---------- */
+button {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Buy Button */
+.buy {
+    background-color: #22c55e;
+    color: white;
+}
+
+/* ---------- ALERT STYLES (IMPORTANT) ---------- */
+
+/* Alert Row */
+.stock.alert-stock {
+    border-left: 6px solid red !important;
+    background-color: rgba(255, 0, 0, 0.2) !important;
+}
+
+/* Alert Sell Button */
+.stock button.sell-alert {
+    background-color: red !important;
+    color: white !important;
+    border: 2px solid darkred !important;
+    animation: blink 1s infinite;
+}
+
+/* ---------- Stop Alarm Button ---------- */
+.stop-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: orange;
+    padding: 12px 20px;
+    font-size: 16px;
+    display: none;
+    border-radius: 10px;
+}
+
+/* ---------- Add Button ---------- */
+.top-actions {
+    padding: 10px 16px;
+}
+
+.add-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* ---------- Animation ---------- */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
