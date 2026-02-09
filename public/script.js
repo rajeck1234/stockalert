@@ -1,13 +1,6 @@
 
 // const API = "http://localhost:3000";
 const API = "https://stockalert-production.up.railway.app/";
-// const API = "https://stockmarket-production-8cf0.up.railway.app/"
-// const API = "https://stockmarket-8e8r.onrender.com";
-
-// const API = "http://localhost:3000";
-
-// const API = "https://stockmarket-production-8cf0.up.railway.app/"
-// const API = "https://stockmarket-8e8r.onrender.com";
 coun =0
 const alarm = new Audio("alarm.mp3");
 let alertStocks = [];
