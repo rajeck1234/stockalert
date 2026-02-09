@@ -226,16 +226,15 @@ def sell_stock():
 # -----------------------------
 # ALERT LOGIC
 # -----------------------------
-
 @app.route("/check-alerts")
 def check_alerts():
 
     alerts = []
+
     for stock in portfolio:
 
         symbol = stock["name"]
         current_price = prices_cache.get(symbol)
-        # print(current_price)
 
         if current_price is None:
             continue
@@ -243,39 +242,93 @@ def check_alerts():
         buy_price = stock["buy_price"]
         target_price = stock["target_price"]
 
-        # Ignore before 3%
+        # Initialize last price if not exists
+        if "last_price" not in stock:
+            stock["last_price"] = current_price
+
+        # Ignore until +3% profit
         if current_price < target_price:
+            stock["alert_triggered"] = False
+            stock["last_price"] = current_price
             continue
 
-        # Update highest price safely
-        if current_price >= stock["highest_price"]:
+        # Update highest price
+        if current_price > stock["highest_price"]:
             stock["highest_price"] = current_price
             stock["alert_triggered"] = False
 
-        # Always calculate using updated highest
         highest_price = stock["highest_price"]
+        last_price = stock["last_price"]
 
+        # Calculate drop from highest
         drop_percent = (highest_price - current_price) / highest_price
 
-        # stock["alert_triggered"] = False
-        # ✅ FIXED trailing condition
-        if drop_percent >= 0.00 and not stock["alert_triggered"]:
+        # 🟥 Alarm ON → falling direction + drop threshold
+        # print(current_price)
+        # print(last_price)
+        if (current_price <= last_price):
+            stock["alert_triggered"] = True
+            alerts.append(symbol)
 
-            print("hii")
+        # 🟩 Alarm OFF → price rising
+        if current_price > last_price:
+            stock["alert_triggered"] = False
 
-            profit_percent = (current_price - buy_price) / buy_price
+        # Update last price
+        stock["last_price"] = current_price
 
-            # print("profit_percent")
-            # print(profit_percent)
-
-            if profit_percent >= 0.03:
-                stock["alert_triggered"] = True
-                alerts.append(symbol)
-    # save_json("portfolio.json", portfolio)
-    
     save_json("portfolio.json", portfolio)
-    
     return jsonify(alerts)
+    
+# @app.route("/check-alerts")
+# def check_alerts():
+
+#     alerts = []
+#     for stock in portfolio:
+
+#         symbol = stock["name"]
+#         current_price = prices_cache.get(symbol)
+#         # print(current_price)
+
+#         if current_price is None:
+#             continue
+
+#         buy_price = stock["buy_price"]
+#         target_price = stock["target_price"]
+
+#         # Ignore before 3%
+#         if current_price < target_price:
+#             continue
+
+#         # Update highest price safely
+#         if current_price >= stock["highest_price"]:
+#             stock["highest_price"] = current_price
+#             stock["alert_triggered"] = False
+
+#         # Always calculate using updated highest
+#         highest_price = stock["highest_price"]
+
+#         drop_percent = (highest_price - current_price) / highest_price
+
+#         # stock["alert_triggered"] = False
+#         # ✅ FIXED trailing condition
+#         if drop_percent >= 0.00 and not stock["alert_triggered"]:
+
+#             print("hii")
+
+#             profit_percent = (current_price - buy_price) / buy_price
+
+#             # print("profit_percent")
+#             # print(profit_percent)
+
+#             if profit_percent >= 0.03:
+#                 stock["alert_triggered"] = True
+#                 alerts.append(symbol)
+#     # save_json("portfolio.json", portfolio)
+    
+#     save_json("portfolio.json", portfolio)
+    
+#     return jsonify(alerts)
 
 # @app.route("/check-alerts")
 # def check_alerts():
