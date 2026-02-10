@@ -196,7 +196,7 @@ def buy_stock():
     stock = {
         "name": data["name"],
         "buy_price": buy_price,
-        "target_price": buy_price * 1.03,
+        "target_price": buy_price * 1.01,
         "highest_price": buy_price,
         "alert_triggered": False
     }
